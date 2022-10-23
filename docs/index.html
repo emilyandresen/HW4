@@ -2,7 +2,7 @@
     Emily Andresen
     CPSC 332 Web Development
     HW4 JavaScript
-    Last Modified: 10/22/22
+    Last Modified: 10/23/22
  -->
 
 <!DOCTYPE html>
@@ -22,21 +22,24 @@
         }
 
         :root {
-            --hue-neutral: 175;
-            --hue-wrong: 0;
-            --hue-correct: 145;
+            --hue-neutral-dark: #002D72;
+            --hue-neutral-light: #6CACE4;
+            --hue-wrong: #C8102E;
+            --hue-correct: #A1D6CA;
+            --hue-gray: #D7D2CB;
         }
 
         body {
-            --hue: var(--hue-neutral);
+            --hue: var(--hue-neutral-dark);
             padding: 0;
             margin: 0;
             display: flex;
             width: 100vw;
             height: 100vh;
             justify-content: center;
+            flex-direction: column;
             align-items: center;
-            background-color: hsl(var(--hue), 100%, 20%);
+            background-color: var(--hue);
         }
 
         body.correct {
@@ -53,6 +56,7 @@
             background-color: white;
             border-radius: 5px;
             padding: 10px;
+            margin: 5px;
             box-shadow: 0 0 10px 2px;
         }
 
@@ -64,12 +68,11 @@
         }
 
         .btn {
-            --hue: var(--hue-neutral);
-            border: 1px solid hsl(var(--hue), 100%, 30%);
-            background-color: hsl(var(--hue), 100%, 40%);
+            --hue: var(--hue-neutral-light);
+            border: 1px solid var(--hue-neutral-dark);
+            background-color: var(--hue);
             border-radius: 5px;
             padding: 5px 10px;
-            color: cream;
             outline: none;
         }
 
@@ -79,11 +82,11 @@
 
         .btn.correct {
             --hue: var(--hue-correct);
-            color: black;
         }
 
         .btn.wrong {
             --hue: var(--hue-wrong);
+            color: white;
         }
 
         .start-btn,
@@ -206,7 +209,7 @@
                     newInfoBox.id = "info-box";
                     newInfoBox.className = "container";
                     document.body.insertBefore(newInfoBox, document.getElementById("main-container"));
-                    newInfoBox.style = "border: 3px dashed blue; background-color: beige;";
+                    newInfoBox.style = "border: 3px dashed var(--hue-neutral-dark); background-color: var(--hue-gray);";
 
                     let newInfo = document.createElement("p");
                     let curQuestion = shuffledQuestions[currentQuestionIndex];
@@ -237,47 +240,46 @@
 
             const questions = [
                 {
-                    question: 'Red is a primary color',
+                    question: 'True or False? Red is an official Gonzaga University color.',
                     answers: [
-                        { text: 'True', correct: true },
-                        { text: 'False', correct: false },
+                        { text: 'True', correct: false },
+                        { text: 'False', correct: true },
                     ],
-                    info: 'The primary colors are red, yellow, and blue.'
+                    info: 'False. Gonzaga does use red in its spirit gear, but the official university colors are navy and white.'
                 },
                 {
-                    question: 'Which is not a metal alloy',
+                    question: 'Which of the following is NOT an alumni of Gonzaga University',
                     answers: [
-                        { text: '2024-T4', correct: false },
-                        { text: 'Inconel 718', correct: false },
-                        { text: 'AISI 4130', correct: false },
-                        { text: 'Custom 455', correct: false },
-                        { text: 'ABS', correct: true },
-                        { text: 'Ti-6Al-6V-2Sn', correct: false },
+                        { text: 'Thomas Foley', correct: false },
+                        { text: 'Myrtle Woldson', correct: true },
+                        { text: 'Bing Crosby', correct: false },
+                        { text: 'Christine Gregoire', correct: false },
+                        { text: 'John Stockton', correct: false },
+                        { text: 'Thayne McCulloh', correct: false },
                     ],
-                    info: 'ABS is a polymer. All others are metal alloys.'
+                    info: 'Miss Myrtle Woldson graciously donated the funds to build the performing arts center at Gonzaga named in her honor and was a lifelong supporter of Gonzaga University, but was never enrolled at the university.'
                 },
                 {
-                    question: "Which equation is a representation of Newton's 2nd Law?",
+                    question: "What is the undergraduate enrollment at Gonzaga?",
                     answers: [
-                        { text: 'P = F/A', correct: false },
-                        { text: 'x^2 + y^2 = z^2', correct: false },
-                        { text: 'E = mc^2', correct: false },
-                        { text: 'F = ma', correct: true },
-                        { text: 'PV = nRT', correct: false },
-                        { text: 'KE = (mv^2)/2', correct: false },
+                        { text: '3,978', correct: false },
+                        { text: '7,295', correct: false },
+                        { text: '6,554', correct: false },
+                        { text: '4,852', correct: true },
+                        { text: '5,291', correct: false },
+                        { text: '8,162', correct: false },
                     ],
-                    info: "Newton's 2nd Law is the conservation of momentum, represented by F = ma."
+                    info: "Gonzaga has an undergraduate enrollment of 4,852 students and a total enrollment of 7,295 students."
                 },
                 {
-                    question: 'Which Kardashian-Jenner sister is the youngest?',
+                    question: 'Which is not a considered a suite-style dorm?',
                     answers: [
-                        { text: 'Khloe', correct: false },
-                        { text: 'Kylie', correct: true },
-                        { text: 'Kim', correct: false },
-                        { text: 'Kendall', correct: false }, 
-                        { text: 'Kourtney', correct: false },                      
+                        { text: 'Goller', correct: false },
+                        { text: 'Coughlin', correct: true },
+                        { text: 'Dussault', correct: false },
+                        { text: 'Dillon', correct: false },                      
                     ],
-                    info: 'The age order is Kourtney, Kim, Khloe, Kendall, Kylie.'
+                    info: 'Coughlin is a traditional corridor-style dorm, while the rest are suite-style.'
                 },
                 {
                     question: 'Which day does the COG serve salmon',
@@ -288,51 +290,53 @@
                         { text: 'Thursday', correct: false },
                         { text: 'Friday', correct: false },
                     ],
-                    info: 'This is additional information about your fifth quiz response.'
+                    info: 'Every Wednesday, the dining hall at Gonzaga, the COG, serves freshly cooked salmon. It is a student and faculty favorite.'
                 },
                 {
-                    question: 'Los Angeles is the largest city in the United States.',
+                    question: 'The Gonzaga mascot is Spike the Bulldog.',
                     answers: [
-                        { text: 'True', correct: false },
-                        { text: 'False', correct: true },
+                        { text: 'True', correct: true },
+                        { text: 'False', correct: false },
                     ],
-                    info: 'New York City is the largest city in the United States. Los Angeles is the second largest.'
+                    info: 'True, Spike the Bulldog is the mascot at Gonzaga University.'
                 },
                 {
-                    question: 'What is 2 + 2',
+                    question: 'Which professor is in the Mechanical Engineering department at Gonzaga?',
                     answers: [
-                        { text: '22', correct: false },
-                        { text: '4', correct: true },
+                        { text: 'Dr. Stohlmann', correct: false },
+                        { text: 'Dr. Capobianchi', correct: true },
+                        { text: 'Dr. Tarver', correct: false },
+                        { text: 'Dr. Alsaker', correct: false },
                     ],
-                    info: '2 + 2 = 4. 20 + 2 = 22'
+                    info: 'Dr. Capobianchi is a professor of Mechanical Engineering. Drs. Stohlmann and Tarver are both in the Vocal Studies department, and Dr. Alsaker works in the Math department.'
                 },
                 {
-                    question: 'How many biological siblings does Emily have?',
+                    question: 'How many total credits do Gonzaga students need as a minimum to graduate?',
                     answers: [
-                        { text: '0', correct: false },
-                        { text: '1', correct: false },
-                        { text: '2', correct: true },
-                        { text: '3', correct: false },
+                        { text: '138', correct: false },
+                        { text: '132', correct: false },
+                        { text: '128', correct: true },
+                        { text: '144', correct: false },
                     ],
-                    info: 'Emily has two sisters.'
+                    info: 'Gonzaga students need at least 128 credits to graduate, which can include transfer credits.'
                 },
                 {
-                    question: 'How many states are in the continental United States',
+                    question: 'How many majors are offered at Gonzaga University?',
                     answers: [
                         { text: '48', correct: true },
                         { text: '52', correct: false },
                         { text: '50', correct: false },
                         { text: '46', correct: false },
                     ],
-                    info: '48 of the 50 states are part of the continental United States. The two states that are not are Alaska and Hawaii.'
+                    info: 'Gonzaga offers 52 undergraduate majors, 54 minors, and 37 concentrations.'
                 },
                 {
-                    question: 'Cats live longer on average than dogs.',
+                    question: 'The current Gonzaga University president is Thayne McCulloh.',
                     answers: [
                         { text: 'True', correct: true },
                         { text: 'False', correct: false },
                     ],
-                    info: 'The average cat lives 15 years and the average dog lives 10 to 13 depending on the breed.'
+                    info: 'Thayne McCulloh has been president of Gonzaga University since 2010.'
                 },
                 
             ]
@@ -341,9 +345,10 @@
 </head>
 
 <body>
-    <div class="container" id="options" style="border: 3px dashed darkred; background-color: beige;">
+    <h1 style="color: white; text-align: center;">Gonzaga University Trivia</h1>
+    <div class="container" id="options" style="border: 3px dashed var(--hue-wrong); background-color: var(--hue-gray);">
         <label for="shuffled">Shuffle Cards:</label>
-        <input type="checkbox" name="shuffled" id="shuffled"><br>
+        <input type="checkbox" name="shuffled" id="shuffled" checked><br>
         
         <label for="timed">Timed Session:</label>
         <input type="checkbox" name="timed" id="timed"><br>
