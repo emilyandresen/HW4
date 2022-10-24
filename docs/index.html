@@ -5,376 +5,459 @@
     Last Modified: 10/23/22
  -->
 
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Quiz App</title>
-    <style>
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            font-family: Gotham Rounded;
-        }
-
-        :root {
-            --hue-neutral-dark: #002D72;
-            --hue-neutral-light: #6CACE4;
-            --hue-wrong: #C8102E;
-            --hue-correct: #A1D6CA;
-            --hue-gray: #D7D2CB;
-        }
-
-        body {
-            --hue: var(--hue-neutral-dark);
-            padding: 0;
-            margin: 0;
-            display: flex;
-            width: 100vw;
-            height: 100vh;
-            justify-content: center;
-            flex-direction: column;
-            align-items: center;
-            background-color: var(--hue);
-        }
-
-        body.correct {
-            --hue: var(--hue-correct);
-        }
-
-        body.wrong {
-            --hue: var(--hue-wrong);
-        }
-
-        .container {
-            width: 800px;
-            max-width: 80%;
-            background-color: white;
-            border-radius: 5px;
-            padding: 10px;
-            margin: 5px;
-            box-shadow: 0 0 10px 2px;
-        }
-
-        .btn-grid {
-            display: grid;
-            grid-template-columns: repeat(2, auto);
-            gap: 10px;
-            margin: 20px 0;
-        }
-
-        .btn {
-            --hue: var(--hue-neutral-light);
-            border: 1px solid var(--hue-neutral-dark);
-            background-color: var(--hue);
-            border-radius: 5px;
-            padding: 5px 10px;
-            outline: none;
-        }
-
-        .btn:hover {
-            border-color: black;
-        }
-
-        .btn.correct {
-            --hue: var(--hue-correct);
-        }
-
-        .btn.wrong {
-            --hue: var(--hue-wrong);
-            color: white;
-        }
-
-        .start-btn,
-        .back-btn,
-        .next-btn,
-        .restart-btn {
-            font-size: 1.5rem;
-            font-weight: bold;
-            padding: 10px 20px;
-            margin: 10px;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .hide {
-            display: none;
-        }
-    </style>
-    <script>
-
-        // Add an event listener for the DOMContentLoaded event
-        window.addEventListener("DOMContentLoaded", domLoaded);
-
-        function domLoaded() {
-            const startButton = document.getElementById('start-btn')
-            const backButton = document.getElementById('back-btn')
-            const nextButton = document.getElementById('next-btn')
-            const restartButton = document.getElementById('restart-btn')
-            const questionContainerElement = document.getElementById('question-container')
-            const questionElement = document.getElementById('question')
-            const answerButtonsElement = document.getElementById('answer-buttons')
-
-            let shuffledQuestions, currentQuestionIndex
-            //using the domLoaded function because the buttons need to be rendered before we can
-            //add an event listener
-            startButton.addEventListener('click', startGame)
-            backButton.addEventListener('click', () => {
-                currentQuestionIndex = currentQuestionIndex - 1;
-                setNextQuestion()
-            })
-            nextButton.addEventListener('click', () => {
-                currentQuestionIndex++
-                setNextQuestion()
-            })
-            restartButton.addEventListener('click', restartGame)
-
-            function startGame() {
-                const optionsElement = document.getElementById("options")
-                console.log(optionsElement.getElementsByClassName('input'))
-                startButton.classList.add('hide')
-                optionsElement.classList.add('hide')
-                shuffledQuestions = questions.sort(() => Math.random() - .5)
-                currentQuestionIndex = 0
-                questionContainerElement.classList.remove('hide')
-                setNextQuestion()                
-            }
-
-            function restartGame() {
-                restartButton.classList.add('hide')
-                currentQuestionIndex = 0
-                questionContainerElement.classList.remove('hide')
-                setNextQuestion()
-            }
-
-            function setNextQuestion() {
-                resetState()
-                showQuestion(shuffledQuestions[currentQuestionIndex])
-            }
-
-            function showQuestion(question) {
-                questionElement.innerText = question.question
-                question.answers.forEach(answer => {
-                    const button = document.createElement('button')
-                    button.innerText = answer.text
-                    button.classList.add('btn')
-                    if (answer.correct) {
-                        button.dataset.correct = answer.correct
-                    }
-                    button.addEventListener('click', selectAnswer)
-                    answerButtonsElement.appendChild(button)
-                })
-            }
-
-            function resetState() {
-                clearStatusClass(document.body)
-                backButton.classList.add('hide')
-                nextButton.classList.add('hide')
-                while (answerButtonsElement.firstChild) {
-                    answerButtonsElement.removeChild(answerButtonsElement.firstChild)
-                }
-                removeInfoBox();
-            }
-
-            function selectAnswer(e) {
-                const selectedButton = e.target
-                const correct = selectedButton.dataset.correct
-                
-                setStatusClass(document.body, correct)
-                Array.from(answerButtonsElement.children).forEach(button => {
-                    setStatusClass(button, button.dataset.correct)
-                })
-                addInfoBox(currentQuestionIndex);
-                if (shuffledQuestions.length > currentQuestionIndex + 1) {
-                    if (currentQuestionIndex > 0) {
-                        backButton.classList.remove('hide')
-                    }
-                    nextButton.classList.remove('hide')
-                } else {
-                    restartButton.classList.remove('hide')
-                }
-            }
-
-            function addInfoBox(idx) {
-                if (document.getElementById("info-box") == null) {
-                    let newInfoBox = document.createElement("div");
-                    newInfoBox.id = "info-box";
-                    newInfoBox.className = "container";
-                    document.body.insertBefore(newInfoBox, document.getElementById("main-container"));
-                    newInfoBox.style = "border: 3px dashed var(--hue-neutral-dark); background-color: var(--hue-gray);";
-
-                    let newInfo = document.createElement("p");
-                    let curQuestion = shuffledQuestions[currentQuestionIndex];
-                    newInfo.textContent = curQuestion.info;
-                    document.getElementById("info-box").appendChild(newInfo);
-                }
-            }
-
-            function removeInfoBox() {
-                if (document.getElementById("info-box") != null) {
-                    document.getElementById("info-box").remove();
-                }
-            }
-
-            function setStatusClass(element, correct) {
-                clearStatusClass(element)
-                if (correct) {
-                    element.classList.add('correct')
-                } else {
-                    element.classList.add('wrong')
-                }
-            }
-
-            function clearStatusClass(element) {
-                element.classList.remove('correct')
-                element.classList.remove('wrong')
-            }
-
-            const questions = [
-                {
-                    question: 'True or False? Red is an official Gonzaga University color.',
-                    answers: [
-                        { text: 'True', correct: false },
-                        { text: 'False', correct: true },
-                    ],
-                    info: 'False. Gonzaga does use red in its spirit gear, but the official university colors are navy and white.'
-                },
-                {
-                    question: 'Which of the following is NOT an alumni of Gonzaga University',
-                    answers: [
-                        { text: 'Thomas Foley', correct: false },
-                        { text: 'Myrtle Woldson', correct: true },
-                        { text: 'Bing Crosby', correct: false },
-                        { text: 'Christine Gregoire', correct: false },
-                        { text: 'John Stockton', correct: false },
-                        { text: 'Thayne McCulloh', correct: false },
-                    ],
-                    info: 'Miss Myrtle Woldson graciously donated the funds to build the performing arts center at Gonzaga named in her honor and was a lifelong supporter of Gonzaga University, but was never enrolled at the university.'
-                },
-                {
-                    question: "What is the undergraduate enrollment at Gonzaga?",
-                    answers: [
-                        { text: '3,978', correct: false },
-                        { text: '7,295', correct: false },
-                        { text: '6,554', correct: false },
-                        { text: '4,852', correct: true },
-                        { text: '5,291', correct: false },
-                        { text: '8,162', correct: false },
-                    ],
-                    info: "Gonzaga has an undergraduate enrollment of 4,852 students and a total enrollment of 7,295 students."
-                },
-                {
-                    question: 'Which is not a considered a suite-style dorm?',
-                    answers: [
-                        { text: 'Goller', correct: false },
-                        { text: 'Coughlin', correct: true },
-                        { text: 'Dussault', correct: false },
-                        { text: 'Dillon', correct: false },                      
-                    ],
-                    info: 'Coughlin is a traditional corridor-style dorm, while the rest are suite-style.'
-                },
-                {
-                    question: 'Which day does the COG serve salmon',
-                    answers: [
-                        { text: 'Monday', correct: false },
-                        { text: 'Tuesday', correct: false },
-                        { text: 'Wednesday', correct: true },
-                        { text: 'Thursday', correct: false },
-                        { text: 'Friday', correct: false },
-                    ],
-                    info: 'Every Wednesday, the dining hall at Gonzaga, the COG, serves freshly cooked salmon. It is a student and faculty favorite.'
-                },
-                {
-                    question: 'The Gonzaga mascot is Spike the Bulldog.',
-                    answers: [
-                        { text: 'True', correct: true },
-                        { text: 'False', correct: false },
-                    ],
-                    info: 'True, Spike the Bulldog is the mascot at Gonzaga University.'
-                },
-                {
-                    question: 'Which professor is in the Mechanical Engineering department at Gonzaga?',
-                    answers: [
-                        { text: 'Dr. Stohlmann', correct: false },
-                        { text: 'Dr. Capobianchi', correct: true },
-                        { text: 'Dr. Tarver', correct: false },
-                        { text: 'Dr. Alsaker', correct: false },
-                    ],
-                    info: 'Dr. Capobianchi is a professor of Mechanical Engineering. Drs. Stohlmann and Tarver are both in the Vocal Studies department, and Dr. Alsaker works in the Math department.'
-                },
-                {
-                    question: 'How many total credits do Gonzaga students need as a minimum to graduate?',
-                    answers: [
-                        { text: '138', correct: false },
-                        { text: '132', correct: false },
-                        { text: '128', correct: true },
-                        { text: '144', correct: false },
-                    ],
-                    info: 'Gonzaga students need at least 128 credits to graduate, which can include transfer credits.'
-                },
-                {
-                    question: 'How many majors are offered at Gonzaga University?',
-                    answers: [
-                        { text: '48', correct: true },
-                        { text: '52', correct: false },
-                        { text: '50', correct: false },
-                        { text: '46', correct: false },
-                    ],
-                    info: 'Gonzaga offers 52 undergraduate majors, 54 minors, and 37 concentrations.'
-                },
-                {
-                    question: 'The current Gonzaga University president is Thayne McCulloh.',
-                    answers: [
-                        { text: 'True', correct: true },
-                        { text: 'False', correct: false },
-                    ],
-                    info: 'Thayne McCulloh has been president of Gonzaga University since 2010.'
-                },
-                
-            ]
-        }
-    </script>
-</head>
-
-<body>
-    <h1 style="color: white; text-align: center;">Gonzaga University Trivia</h1>
-    <div class="container" id="options" style="border: 3px dashed var(--hue-wrong); background-color: var(--hue-gray);">
-        <label for="shuffled">Shuffle Cards:</label>
-        <input type="checkbox" name="shuffled" id="shuffled" checked><br>
-        
-        <label for="timed">Timed Session:</label>
-        <input type="checkbox" name="timed" id="timed"><br>
-        
-        <label for="remove-correct">Remove Correct From Deck:</label>
-        <input type="checkbox" name="remove-correct" id="remove-correct">
-    </div>
-    <div class="container" id="main-container">
-        <div id="question-container" class="hide">
-            <div id="question">Question</div>
-            <div id="answer-buttons" class="btn-grid">
-                <button class="btn">Answer 1</button>
-                <button class="btn">Answer 2</button>
-                <button class="btn">Answer 3</button>
-                <button class="btn">Answer 4</button>
-            </div>
-        </div>
-        <div class="controls">
-            <button id="start-btn" class="start-btn btn">Start</button>
-            <button id="back-btn" class="back-btn btn hide">Back</button>
-            <button id="next-btn" class="next-btn btn hide">Next</button>
-            <button id="restart-btn" class="restart-btn btn hide">Restart</button>
-        </div>
-    </div>
-</body>
-
-
-
-</html>
+ <!DOCTYPE html>
+ <html lang="en">
+ 
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+     <title>Quiz App</title>
+     <style>
+         *,
+         *::before,
+         *::after {
+             box-sizing: border-box;
+             font-family: Gotham Rounded;
+         }
+ 
+         :root {
+             --hue-neutral-dark: #002D72;
+             --hue-neutral-light: #6CACE4;
+             --hue-wrong: #C8102E;
+             --hue-correct: hsl(166, 39%, 32%);
+             --hue-gray: #D7D2CB;
+         }
+ 
+         body {
+             --hue: var(--hue-neutral-dark);
+             padding: 0;
+             margin: 0;
+             display: flex;
+             width: 100vw;
+             height: 100vh;
+             justify-content: center;
+             flex-direction: column;
+             align-items: center;
+             background-color: var(--hue);
+         }
+ 
+         h1 {
+             color: white;
+             text-align: center;
+         }
+ 
+         body.correct {
+             --hue: var(--hue-correct);
+         }
+ 
+         body.wrong {
+             --hue: var(--hue-wrong);
+         }
+ 
+         .container {
+             width: 800px;
+             max-width: 80%;
+             background-color: white;
+             border-radius: 5px;
+             padding: 10px;
+             margin: 5px;
+             box-shadow: 0 0 10px 2px;
+         }
+ 
+         .btn-grid {
+             display: grid;
+             grid-template-columns: repeat(2, auto);
+             gap: 10px;
+             margin: 20px 0;
+         }
+ 
+         .btn {
+             --hue: var(--hue-neutral-light);
+             border: 1px solid var(--hue-neutral-dark);
+             background-color: var(--hue);
+             border-radius: 5px;
+             padding: 5px 10px;
+             outline: none;
+         }
+ 
+         .btn:hover {
+             border-color: black;
+         }
+ 
+         .btn.correct {
+             --hue: var(--hue-correct);
+             color: white;
+         }
+ 
+         .btn.wrong {
+             --hue: var(--hue-wrong);
+             color: white;
+         }
+ 
+         .start-btn,
+         .back-btn,
+         .next-btn,
+         .restart-btn {
+             font-size: 1.5rem;
+             font-weight: bold;
+             padding: 10px 20px;
+             margin: 10px;
+         }
+ 
+         .controls {
+             display: flex;
+             justify-content: center;
+             align-items: center;
+         }
+ 
+         .hide {
+             display: none;
+         }
+     </style>
+     <script>
+ 
+         // Add an event listener for the DOMContentLoaded event
+         window.addEventListener("DOMContentLoaded", domLoaded);
+ 
+         function domLoaded() {
+             const startButton = document.getElementById('start-btn')
+             const backButton = document.getElementById('back-btn')
+             const nextButton = document.getElementById('next-btn')
+             const restartButton = document.getElementById('restart-btn')
+             const questionContainerElement = document.getElementById('question-container')
+             const questionElement = document.getElementById('question')
+             const answerButtonsElement = document.getElementById('answer-buttons')
+             const optionsMenuElement = document.getElementById("options")
+ 
+             let shuffledQuestions, currentQuestionIndex, correctIndices
+             //using the domLoaded function because the buttons need to be rendered before we can
+             //add an event listener
+             startButton.addEventListener('click', startGame)
+             backButton.addEventListener('click', () => {
+                 currentQuestionIndex = currentQuestionIndex - 1;
+                 setNextQuestion()
+             })
+             nextButton.addEventListener('click', () => {
+                 currentQuestionIndex++
+                 setNextQuestion()
+             })
+             restartButton.addEventListener('click', restartGame)
+ 
+             let shuffled = true;
+             const shuffledButton = document.getElementById("shuffled");
+             shuffledButton.addEventListener('click', () => {
+                 if (shuffled) {
+                     shuffled = false;
+                 }
+                 else if (!shuffled) {
+                     shuffled = true;
+                 }
+             });
+ 
+             let timed = false;
+             const timedButton = document.getElementById("timed");
+             timedButton.addEventListener('click', () => {
+                 if (timed) {
+                     timed = false;
+                 }
+                 else if (!timed) {
+                     timed = true;
+                 }
+             });
+ 
+             let removeCorrect = false;
+             const removeCorrectButton = document.getElementById("remove-correct");
+             removeCorrectButton.addEventListener('click', () => {
+                 if (removeCorrect) {
+                     removeCorrect = false;
+                 }
+                 else if (!removeCorrect) {
+                     removeCorrect = true;
+                 }
+             });
+ 
+             function startGame() {
+                 startButton.classList.add('hide')
+                 optionsMenuElement.classList.add('hide')
+                 console.log(shuffled)
+                 console.log(timed)
+                 console.log(removeCorrect)
+ 
+                 if (shuffled) {
+                     shuffledQuestions = questions.sort(() => Math.random() - .5)
+                 } else {
+                     shuffledQuestions = questions
+                 }
+ 
+                 if (timed) {
+                     timeElapsed = document.createElement("h1");
+                     timeElapsed.textContent = "0m:0s";
+                     timeElapsed.style = "color: black";
+                     questionContainerElement.appendChild(timeElapsed);
+                     var clock = null;
+                     startTimer();
+                 }
+ 
+                 correctIndices = new Array(shuffledQuestions.length)
+                 currentQuestionIndex = 0
+                 questionContainerElement.classList.remove('hide')
+                 setNextQuestion()                
+             }
+ 
+             function restartGame() {
+                 restartButton.classList.add('hide')
+                 // if (removeCorrect) {
+                 //     for (i=0; i < shuffledQuestions.length; i++) {
+                 //         if (correctIndices[i]) {
+                 //             // shuffledQuestions.
+                 //             console.log(i + " " + shuffledQuestions)
+                 //         }
+                 //     }
+                 // }
+                 currentQuestionIndex = 0
+                 questionContainerElement.classList.remove('hide')
+                 setNextQuestion()
+             }
+ 
+             function startTimer() {
+                 startTime = new Date().getTime()
+                 clock = setInterval(updateTimer, 1000);
+             }
+ 
+             function stopTimer() {
+                 clearInterval(clock)
+             }
+ 
+             function updateTimer() {
+                 timeInterval = Math.floor((new Date().getTime() - startTime) / 1000);
+                 let min = Math.floor(timeInterval / 60);
+                 let sec = timeInterval % 60;
+                 timeElapsed.textContent = min + "m:" + sec + "s"; 
+             }
+ 
+             function setNextQuestion() {
+                 resetState()
+                 showQuestion(shuffledQuestions[currentQuestionIndex])
+             }
+ 
+             function showQuestion(question) {
+                 questionElement.innerText = question.question
+                 question.answers.forEach(answer => {
+                     const button = document.createElement('button')
+                     button.innerText = answer.text
+                     button.classList.add('btn')
+                     if (answer.correct) {
+                         button.dataset.correct = answer.correct
+                     }
+                     button.addEventListener('click', selectAnswer)
+                     answerButtonsElement.appendChild(button)
+                 })
+             }
+ 
+             function resetState() {
+                 clearStatusClass(document.body)
+                 backButton.classList.add('hide')
+                 nextButton.classList.add('hide')
+                 while (answerButtonsElement.firstChild) {
+                     answerButtonsElement.removeChild(answerButtonsElement.firstChild)
+                 }
+                 removeInfoBox();
+             }
+ 
+             function selectAnswer(e) {
+                 const selectedButton = e.target
+                 const correct = selectedButton.dataset.correct
+                 correctIndices[currentQuestionIndex] = correct
+                 console.log(correctIndices)
+                 
+                 setStatusClass(document.body, correct)
+                 Array.from(answerButtonsElement.children).forEach(button => {
+                     setStatusClass(button, button.dataset.correct)
+                 })
+                 addInfoBox(currentQuestionIndex);
+                 if (shuffledQuestions.length > currentQuestionIndex + 1) {
+                     if (currentQuestionIndex > 0) {
+                         backButton.classList.remove('hide')
+                     }
+                     nextButton.classList.remove('hide')
+                 } else {
+                     restartButton.classList.remove('hide')
+                 }
+             }
+ 
+             function addInfoBox(idx) {
+                 if (document.getElementById("info-box") == null) {
+                     let newInfoBox = document.createElement("div");
+                     newInfoBox.id = "info-box";
+                     newInfoBox.className = "container";
+                     document.body.insertBefore(newInfoBox, document.getElementById("main-container"));
+                     newInfoBox.style = "border: 3px dashed var(--hue-neutral-dark); background-color: var(--hue-gray);";
+ 
+                     let newInfo = document.createElement("p");
+                     let curQuestion = shuffledQuestions[currentQuestionIndex];
+                     newInfo.textContent = curQuestion.info;
+                     document.getElementById("info-box").appendChild(newInfo);
+                 }
+             }
+ 
+             function removeInfoBox() {
+                 if (document.getElementById("info-box") != null) {
+                     document.getElementById("info-box").remove();
+                 }
+             }
+ 
+             function setStatusClass(element, correct) {
+                 clearStatusClass(element)
+                 if (correct) {
+                     element.classList.add('correct')
+                 } else {
+                     element.classList.add('wrong')
+                 }
+             }
+ 
+             function clearStatusClass(element) {
+                 element.classList.remove('correct')
+                 element.classList.remove('wrong')
+             }
+ 
+             const questions = [
+                 {
+                     question: 'True or False? Red is an official Gonzaga University color.',
+                     answers: [
+                         { text: 'True', correct: false },
+                         { text: 'False', correct: true },
+                     ],
+                     info: 'False. Gonzaga does use red in its spirit gear, but the official university colors are navy and white.'
+                 },
+                 {
+                     question: 'Which of the following is NOT an alumni of Gonzaga University',
+                     answers: [
+                         { text: 'Thomas Foley', correct: false },
+                         { text: 'Myrtle Woldson', correct: true },
+                         { text: 'Bing Crosby', correct: false },
+                         { text: 'Christine Gregoire', correct: false },
+                         { text: 'John Stockton', correct: false },
+                         { text: 'Thayne McCulloh', correct: false },
+                     ],
+                     info: 'Miss Myrtle Woldson graciously donated the funds to build the performing arts center at Gonzaga named in her honor and was a lifelong supporter of Gonzaga University, but was never enrolled at the university.'
+                 },
+                 {
+                     question: "What is the undergraduate enrollment at Gonzaga?",
+                     answers: [
+                         { text: '3,978', correct: false },
+                         { text: '7,295', correct: false },
+                         { text: '6,554', correct: false },
+                         { text: '4,852', correct: true },
+                         { text: '5,291', correct: false },
+                         { text: '8,162', correct: false },
+                     ],
+                     info: "Gonzaga has an undergraduate enrollment of 4,852 students and a total enrollment of 7,295 students."
+                 },
+                 {
+                     question: 'Which is not a considered a suite-style dorm?',
+                     answers: [
+                         { text: 'Goller', correct: false },
+                         { text: 'Coughlin', correct: true },
+                         { text: 'Dussault', correct: false },
+                         { text: 'Dillon', correct: false },                      
+                     ],
+                     info: 'Coughlin is a traditional corridor-style dorm, while the rest are suite-style.'
+                 },
+                 {
+                     question: 'Which day does the COG serve salmon',
+                     answers: [
+                         { text: 'Monday', correct: false },
+                         { text: 'Tuesday', correct: false },
+                         { text: 'Wednesday', correct: true },
+                         { text: 'Thursday', correct: false },
+                         { text: 'Friday', correct: false },
+                     ],
+                     info: 'Every Wednesday, the dining hall at Gonzaga, the COG, serves freshly cooked salmon. It is a student and faculty favorite.'
+                 },
+                 {
+                     question: 'The Gonzaga mascot is Spike the Bulldog.',
+                     answers: [
+                         { text: 'True', correct: true },
+                         { text: 'False', correct: false },
+                     ],
+                     info: 'True, Spike the Bulldog is the mascot at Gonzaga University.'
+                 },
+                 {
+                     question: 'Which professor is in the Mechanical Engineering department at Gonzaga?',
+                     answers: [
+                         { text: 'Dr. Stohlmann', correct: false },
+                         { text: 'Dr. Capobianchi', correct: true },
+                         { text: 'Dr. Tarver', correct: false },
+                         { text: 'Dr. Alsaker', correct: false },
+                     ],
+                     info: 'Dr. Capobianchi is a professor of Mechanical Engineering. Drs. Stohlmann and Tarver are both in the Vocal Studies department, and Dr. Alsaker works in the Math department.'
+                 },
+                 {
+                     question: 'How many total credits do Gonzaga students need as a minimum to graduate?',
+                     answers: [
+                         { text: '138', correct: false },
+                         { text: '132', correct: false },
+                         { text: '128', correct: true },
+                         { text: '144', correct: false },
+                     ],
+                     info: 'Gonzaga students need at least 128 credits to graduate, which can include transfer credits.'
+                 },
+                 {
+                     question: 'How many majors are offered at Gonzaga University?',
+                     answers: [
+                         { text: '48', correct: true },
+                         { text: '52', correct: false },
+                         { text: '50', correct: false },
+                         { text: '46', correct: false },
+                     ],
+                     info: 'Gonzaga offers 52 undergraduate majors, 54 minors, and 37 concentrations.'
+                 },
+                 {
+                     question: 'The current Gonzaga University president is Thayne McCulloh.',
+                     answers: [
+                         { text: 'True', correct: true },
+                         { text: 'False', correct: false },
+                     ],
+                     info: 'Thayne McCulloh has been president of Gonzaga University since 2010.'
+                 },
+                 
+             ]
+         }
+     </script>
+ </head>
+ 
+ <body>
+     <h1>Gonzaga University Trivia</h1>
+     <div class="container" id="options" style="border: 3px dashed var(--hue-wrong); background-color: var(--hue-gray);">
+         <label for="shuffled">Shuffle Cards:</label>
+         <input type="checkbox" name="shuffled" id="shuffled" checked><br>
+         
+         <label for="timed">Timed Session:</label>
+         <input type="checkbox" name="timed" id="timed"><br>
+         
+         <label for="remove-correct">Remove Correct From Deck:</label>
+         <input type="checkbox" name="remove-correct" id="remove-correct">
+     </div>
+     <div class="container" id="main-container">
+         <div id="question-container" class="hide">
+             <div id="question">Question</div>
+             <div id="answer-buttons" class="btn-grid">
+                 <button class="btn">Answer 1</button>
+                 <button class="btn">Answer 2</button>
+                 <button class="btn">Answer 3</button>
+                 <button class="btn">Answer 4</button>
+             </div>
+         </div>
+         <div class="controls">
+             <button id="start-btn" class="start-btn btn">Start</button>
+             <button id="back-btn" class="back-btn btn hide">Back</button>
+             <button id="next-btn" class="next-btn btn hide">Next</button>
+             <button id="restart-btn" class="restart-btn btn hide">Restart</button>
+         </div>
+     </div>
+ </body>
+ 
+ 
+ 
+ </html>
