@@ -272,12 +272,10 @@
                  })
                  addInfoBox(currentQuestionIndex);
  
-                 if (correct) {
+                 if (correct && removeCorrect) {
                      correctQuestions[currentQuestionIndex] = shuffledQuestions[currentQuestionIndex];
                      shuffledQuestions[currentQuestionIndex] = null;
                  }
-                 console.log(correctQuestions);
-                 console.log(shuffledQuestions);
  
                  moreQuestions = false;
                  for (i = 0; i < shuffledQuestions.length; i++) {
@@ -287,11 +285,11 @@
                  }
                  if (!moreQuestions) {
                      resetState();
-                     questionElement.innerText = "All questions have been answered correctly.";
+                     questionElement.innerText = "All questions have been answered correctly. Good work!";
+                     stopTimer();
                  }
  
                  else if (shuffledQuestions.length <= currentQuestionIndex + 1) {
- 
                      backButton.classList.add('hide');
                      restartButton.classList.remove('hide');
                  } 
@@ -369,7 +367,7 @@
                      info: 'False. Gonzaga does use red in its spirit gear, but the official university colors are navy and white.'
                  },
                  {
-                     question: 'Which of the following is NOT an alumni of Gonzaga University',
+                     question: 'Which of the following is NOT an alumni of Gonzaga University?',
                      answers: [
                          { text: 'Thomas Foley', correct: false },
                          { text: 'Myrtle Woldson', correct: true },
@@ -403,7 +401,7 @@
                      info: 'Coughlin is a traditional corridor-style dorm, while the rest are suite-style.'
                  },
                  {
-                     question: 'Which day does the COG serve salmon',
+                     question: 'Which day does the COG serve salmon?',
                      answers: [
                          { text: 'Monday', correct: false },
                          { text: 'Tuesday', correct: false },
@@ -414,7 +412,7 @@
                      info: 'Every Wednesday, the dining hall at Gonzaga, the COG, serves freshly cooked salmon. It is a student and faculty favorite.'
                  },
                  {
-                     question: 'The Gonzaga mascot is Spike the Bulldog.',
+                     question: 'True or False? The Gonzaga mascot is Spike the Bulldog.',
                      answers: [
                          { text: 'True', correct: true },
                          { text: 'False', correct: false },
@@ -452,7 +450,7 @@
                      info: 'Gonzaga offers 52 undergraduate majors, 54 minors, and 37 concentrations.'
                  },
                  {
-                     question: 'The current Gonzaga University president is Thayne McCulloh.',
+                     question: 'True or False? The current Gonzaga University president is Thayne McCulloh.',
                      answers: [
                          { text: 'True', correct: true },
                          { text: 'False', correct: false },
