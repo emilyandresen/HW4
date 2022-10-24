@@ -121,29 +121,31 @@
          window.addEventListener("DOMContentLoaded", domLoaded);
  
          function domLoaded() {
-             const startButton = document.getElementById('start-btn')
-             const backButton = document.getElementById('back-btn')
-             const nextButton = document.getElementById('next-btn')
-             const restartButton = document.getElementById('restart-btn')
-             const questionContainerElement = document.getElementById('question-container')
-             const questionElement = document.getElementById('question')
-             const answerButtonsElement = document.getElementById('answer-buttons')
-             const optionsMenuElement = document.getElementById("options")
+             const startButton = document.getElementById('start-btn');
+             const backButton = document.getElementById('back-btn');
+             const nextButton = document.getElementById('next-btn');
+             const restartButton = document.getElementById('restart-btn');
+             const questionContainerElement = document.getElementById('question-container');
+             const questionElement = document.getElementById('question');
+             const answerButtonsElement = document.getElementById('answer-buttons');
+             const optionsMenuElement = document.getElementById("options");
  
-             let shuffledQuestions, currentQuestionIndex, correctIndices
+             let shuffledQuestions, currentQuestionIndex, correctQuestions;
              //using the domLoaded function because the buttons need to be rendered before we can
              //add an event listener
-             startButton.addEventListener('click', startGame)
+             startButton.addEventListener('click', startGame);
              backButton.addEventListener('click', () => {
                  currentQuestionIndex = currentQuestionIndex - 1;
-                 setNextQuestion()
-             })
+                 setNextQuestion();
+             });
              nextButton.addEventListener('click', () => {
-                 currentQuestionIndex++
-                 setNextQuestion()
-             })
-             restartButton.addEventListener('click', restartGame)
+                 currentQuestionIndex++;
+                 setNextQuestion();
+             });
+             restartButton.addEventListener('click', restartGame);
  
+             // Option Event Listeners
+             // Shuffle Option
              let shuffled = true;
              const shuffledButton = document.getElementById("shuffled");
              shuffledButton.addEventListener('click', () => {
@@ -155,6 +157,7 @@
                  }
              });
  
+             // Timer Option
              let timed = false;
              const timedButton = document.getElementById("timed");
              timedButton.addEventListener('click', () => {
@@ -166,6 +169,7 @@
                  }
              });
  
+             // Remove correct from Deck Option
              let removeCorrect = false;
              const removeCorrectButton = document.getElementById("remove-correct");
              removeCorrectButton.addEventListener('click', () => {
@@ -177,17 +181,15 @@
                  }
              });
  
+             // game start
              function startGame() {
-                 startButton.classList.add('hide')
-                 optionsMenuElement.classList.add('hide')
-                 console.log(shuffled)
-                 console.log(timed)
-                 console.log(removeCorrect)
+                 startButton.classList.add('hide');
+                 optionsMenuElement.classList.add('hide');
  
                  if (shuffled) {
-                     shuffledQuestions = questions.sort(() => Math.random() - .5)
+                     shuffledQuestions = questions.sort(() => Math.random() - .5);
                  } else {
-                     shuffledQuestions = questions
+                     shuffledQuestions = questions;
                  }
  
                  if (timed) {
@@ -199,93 +201,143 @@
                      startTimer();
                  }
  
-                 correctIndices = new Array(shuffledQuestions.length)
-                 currentQuestionIndex = 0
-                 questionContainerElement.classList.remove('hide')
-                 setNextQuestion()                
-             }
+                 correctQuestions = new Array(shuffledQuestions.length);
+                 for (i = 0; i < correctQuestions.length; i++) {
+                     correctQuestions[i] = null; 
+                 }
  
+                 currentQuestionIndex = 0;
+                 questionContainerElement.classList.remove('hide');
+                 setNextQuestion();     
+             };
+ 
+             // Game restart
              function restartGame() {
-                 restartButton.classList.add('hide')
-                 // if (removeCorrect) {
-                 //     for (i=0; i < shuffledQuestions.length; i++) {
-                 //         if (correctIndices[i]) {
-                 //             // shuffledQuestions.
-                 //             console.log(i + " " + shuffledQuestions)
-                 //         }
-                 //     }
-                 // }
-                 currentQuestionIndex = 0
-                 questionContainerElement.classList.remove('hide')
-                 setNextQuestion()
-             }
+                 restartButton.classList.add('hide');
+                 currentQuestionIndex = 0;
+                 questionContainerElement.classList.remove('hide');
+                 setNextQuestion();
+             };
  
+             function setNextQuestion() {
+                 if (shuffledQuestions[currentQuestionIndex] != null) {
+                     resetState();
+                     showQuestion(shuffledQuestions[currentQuestionIndex]);
+                 }
+                 else {
+                     currentQuestionIndex++;
+                     setNextQuestion();
+                 }
+             };
+ 
+             function showQuestion(question) {
+                 questionElement.innerText = question.question;
+                 question.answers.forEach(answer => {
+                     const button = document.createElement('button');
+                     button.innerText = answer.text;
+                     button.classList.add('btn');
+                     if (answer.correct) {
+                         button.dataset.correct = answer.correct;
+                     }
+                     button.addEventListener('click', selectAnswer);
+                     answerButtonsElement.appendChild(button);
+                     if (currentQuestionIndex + 1 >= shuffledQuestions.length) {
+                         nextButton.classList.add('hide');
+                     } else if (nextButton.classList.contains('hide')) {
+                         nextButton.classList.remove('hide');
+                     }
+                     if (currentQuestionIndex > 0 && backButton.classList.contains('hide')) {
+                         backButton.classList.remove('hide');
+                     }
+                 })
+             };
+ 
+             function resetState() {
+                 clearStatusClass(document.body);
+                 backButton.classList.add('hide');
+                 nextButton.classList.add('hide');
+                 while (answerButtonsElement.firstChild) {
+                     answerButtonsElement.removeChild(answerButtonsElement.firstChild);
+                 }
+                 removeInfoBox();
+             };
+ 
+             function selectAnswer(e) {
+                 const selectedButton = e.target;
+                 const correct = selectedButton.dataset.correct;
+                 
+                 setStatusClass(document.body, correct);
+                 Array.from(answerButtonsElement.children).forEach(button => {
+                     setStatusClass(button, button.dataset.correct);
+                 })
+                 addInfoBox(currentQuestionIndex);
+ 
+                 if (correct) {
+                     correctQuestions[currentQuestionIndex] = shuffledQuestions[currentQuestionIndex];
+                     shuffledQuestions[currentQuestionIndex] = null;
+                 }
+                 console.log(correctQuestions);
+                 console.log(shuffledQuestions);
+ 
+                 moreQuestions = false;
+                 for (i = 0; i < shuffledQuestions.length; i++) {
+                     if (shuffledQuestions[i] != null) {
+                         moreQuestions = true;
+                     }
+                 }
+                 if (!moreQuestions) {
+                     resetState();
+                     questionElement.innerText = "All questions have been answered correctly.";
+                 }
+ 
+                 else if (shuffledQuestions.length <= currentQuestionIndex + 1) {
+ 
+                     backButton.classList.add('hide');
+                     restartButton.classList.remove('hide');
+                 } 
+             };
+ 
+             function setStatusClass(element, correct) {
+                 clearStatusClass(element);
+                 if (correct) {
+                     element.classList.add('correct');
+                 } else {
+                     element.classList.add('wrong');
+                 }
+             };
+ 
+             function clearStatusClass(element) {
+                 element.classList.remove('correct');
+                 element.classList.remove('wrong');
+             };
+ 
+             // Timer Implementation
              function startTimer() {
-                 startTime = new Date().getTime()
+                 startTime = new Date().getTime();
                  clock = setInterval(updateTimer, 1000);
              }
  
              function stopTimer() {
-                 clearInterval(clock)
+                 clearInterval(clock);
              }
  
              function updateTimer() {
                  timeInterval = Math.floor((new Date().getTime() - startTime) / 1000);
                  let min = Math.floor(timeInterval / 60);
                  let sec = timeInterval % 60;
-                 timeElapsed.textContent = min + "m:" + sec + "s"; 
-             }
- 
-             function setNextQuestion() {
-                 resetState()
-                 showQuestion(shuffledQuestions[currentQuestionIndex])
-             }
- 
-             function showQuestion(question) {
-                 questionElement.innerText = question.question
-                 question.answers.forEach(answer => {
-                     const button = document.createElement('button')
-                     button.innerText = answer.text
-                     button.classList.add('btn')
-                     if (answer.correct) {
-                         button.dataset.correct = answer.correct
-                     }
-                     button.addEventListener('click', selectAnswer)
-                     answerButtonsElement.appendChild(button)
-                 })
-             }
- 
-             function resetState() {
-                 clearStatusClass(document.body)
-                 backButton.classList.add('hide')
-                 nextButton.classList.add('hide')
-                 while (answerButtonsElement.firstChild) {
-                     answerButtonsElement.removeChild(answerButtonsElement.firstChild)
+                 timeElapsed.textContent = min + "m:" + sec + "s";
+                 if (sec == 30 || sec == 32) {
+                     timeElapsed.style = "background-color: var(--hue-wrong); color: black;";
                  }
-                 removeInfoBox();
-             }
- 
-             function selectAnswer(e) {
-                 const selectedButton = e.target
-                 const correct = selectedButton.dataset.correct
-                 correctIndices[currentQuestionIndex] = correct
-                 console.log(correctIndices)
-                 
-                 setStatusClass(document.body, correct)
-                 Array.from(answerButtonsElement.children).forEach(button => {
-                     setStatusClass(button, button.dataset.correct)
-                 })
-                 addInfoBox(currentQuestionIndex);
-                 if (shuffledQuestions.length > currentQuestionIndex + 1) {
-                     if (currentQuestionIndex > 0) {
-                         backButton.classList.remove('hide')
-                     }
-                     nextButton.classList.remove('hide')
-                 } else {
-                     restartButton.classList.remove('hide')
+                 else if ((sec == 0 || sec == 2) && min > 0) {
+                     timeElapsed.style = "background-color: var(--hue-wrong); color: black;";
+                 }
+                 else {
+                     timeElapsed.style = "background-color: white; color:black;";
                  }
              }
- 
+             
+             // Additional Information Box
              function addInfoBox(idx) {
                  if (document.getElementById("info-box") == null) {
                      let newInfoBox = document.createElement("div");
@@ -305,20 +357,6 @@
                  if (document.getElementById("info-box") != null) {
                      document.getElementById("info-box").remove();
                  }
-             }
- 
-             function setStatusClass(element, correct) {
-                 clearStatusClass(element)
-                 if (correct) {
-                     element.classList.add('correct')
-                 } else {
-                     element.classList.add('wrong')
-                 }
-             }
- 
-             function clearStatusClass(element) {
-                 element.classList.remove('correct')
-                 element.classList.remove('wrong')
              }
  
              const questions = [
